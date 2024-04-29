@@ -10,36 +10,35 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 
-async function handleRequest(req, res) {
+const handleRequest = async (req, res) => {
     const { oftenPlace, wantPlace } = req.body;
 
     console.log('자주 가는 곳:', oftenPlace);
     console.log('원하는 곳:', wantPlace);
 
     try {
-        // Python 서버로 요청 보내기
-        const response = await axios.post('http://192.168.1.98:3000/get-traffic-time', {
-            oftenPlace,
-            wantPlace,
-        });
+        const [trafficTimeResponse, avgRentResponse] = await Promise.all([
+            axios.post('http://192.168.1.98:3000/rent/get-avg', {
+                oftenPlace,
+                wantPlace
+            }),
+            axios.post('http://192.168.1.98:3000/get-traffic-time', {
+                oftenPlace,
+                wantPlace,
+            })
+        ]);
 
-        const trafficTime = response.data;
+        // 응답 처리
+        console.log('교통 시간 응답:', trafficTimeResponse.data);
+        console.log('평균 임대료 응답:', avgRentResponse.data);
 
-        res.json({ status: 200, trafficTime });
+
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ status: 500, error: 'Internal Server Error' });
+        res.status(400).json({ status: 400, error: 'Internal Server Error' });
     }
 }
-app.post('/api/get-oftenplace', handleRequest);
-
-app.get('/api/get-wantplace', (req, res) => {
-
-})
-
-app.get('/api/search-page', (req, res) => {
-
-})
+app.post('/api/get-place', handleRequest);
 
 app.get('/select-less-ten', (req, res) => {
 

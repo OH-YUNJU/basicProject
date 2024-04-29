@@ -100,18 +100,21 @@ def getTime(oftenx, ofteny, wantx, wanty):
 
     response = requests.post(url, json=payload, headers=headers)
     data = response.json()
+    try : 
+        # 가장 작은 totalTime을 가진 경로 찾기
+        min_total_time = float('inf')
+        best_route = None
+        print("Response status code:", response.status_code)
 
-    # 가장 작은 totalTime을 가진 경로 찾기
-    min_total_time = float('inf')
-    best_route = None
-    print("Response status code:", response.status_code)
-
-    for route in data['metaData']['plan']['itineraries']:
-        if route['totalTime'] < min_total_time:
-            min_total_time = route['totalTime']
-            best_route = route
-
-    return ("가장 짧은 totalTime:", min_total_time)
+        for route in data['metaData']['plan']['itineraries']:
+            if route['totalTime'] < min_total_time:
+                min_total_time = route['totalTime']
+                best_route = route
+    except KeyError as e:
+        return ("Status: 400")
+    
+    min_total_time = int(min_total_time/60)
+    return {"min_total_time": min_total_time}
 
 #####################################################################
 
@@ -549,25 +552,6 @@ async def rent_getYearDwAvg(firstx: float, secondx: float, firsty: float, second
     else:
         raise HTTPException(status_code=400)
 
-@app.get('/rent/get-avg')
-async def rent_getAvg():
-    coordinates = search_address('강남구 테헤란로 14길 43-1')
-    if coordinates:
-        x, y = coordinates
-    bounds = getXYBound(x, y)
-    
-    firstx = bounds["firstx"]
-    firsty = bounds["firsty"]
-    secondx = bounds["secondx"]
-    secondy = bounds["secondy"]
-    
-    result1 = await rent_getMonthUpAvg(firstx, secondx, firsty, secondy)
-    result2 = await rent_getMonthDwAvg(firstx, secondx, firsty, secondy)
-    result3 = await rent_getYearUpAvg(firstx, secondx, firsty, secondy)
-    result4 = await rent_getYearDwAvg(firstx, secondx, firsty, secondy)
-    
-    return {"getMonthUpAvg":result1, "getMonthDwAvg":result2, "getYearUpAvg":result3, "getYearDwAvg":result4}
-
 # @app(/rent/less-ten-rank)
 # async def rentLessTenRank(month, year):
 
@@ -598,18 +582,49 @@ async def rent_getAvg():
     # print("Ranked Values:", sorted(values, reverse=True))  # 값들 정렬하여 출력
     # print("Ranks:", ranks  
 
-@app.route('/get-traffic-time', methods=['POST'])
-async def getTrafficTime(request):
-    data = request.json
-    oftenPlace = data['oftenPlace']
-    wantPlace = data['wantPlace']
+@app.post('/get-traffic-time')
+async def getTrafficTime(request: Request):
+    datas = await request.json()
+    oftenPlace = datas.get('oftenPlace')
+    wantPlace = datas.get('wantPlace')
+
+    often_coordinates = search_address(oftenPlace)
+    if not often_coordinates:
+        print("ERROR : 자주 가는 곳 데이터가 없음")
+        return {'success': False}
+    often_x, often_y = often_coordinates
+
+    for place in wantPlace:
+        want_coordinates = search_address(place)
+        if not want_coordinates:
+            print("ERROR : 살고 싶은 곳 데이터가 없음")
+            continue
+        want_x, want_y = want_coordinates
+        print(getTime(often_x, often_y, want_x, want_y))
+        res = getTime(often_x, often_y, want_x, want_y)
+    return res
+
+@app.post('/rent/get-avg')
+async def rent_getAvg(request: Request):
+    data = await request.json()
+    print(data)
+    wantPlace = data.get('wantPlace')
     
-    coordinates = search_address(oftenPlace)
-    if coordinates:
-        oftenx, ofteny = coordinates
-    
-    coordinates = search_address(wantPlace)
-    if coordinates:
-        wantx, wanty = coordinates
-    
-    return (getTime(oftenx, ofteny, wantx, wanty))
+    for place in wantPlace:
+        coordinates = search_address(place)
+        if coordinates:
+            x, y = coordinates
+        bounds = getXYBound(x, y)
+
+        firstx = bounds["firstx"]
+        firsty = bounds["firsty"]
+        secondx = bounds["secondx"]
+        secondy = bounds["secondy"]
+        
+        result1 = await rent_getMonthUpAvg(firstx, secondx, firsty, secondy)
+        result2 = await rent_getMonthDwAvg(firstx, secondx, firsty, secondy)
+        result3 = await rent_getYearUpAvg(firstx, secondx, firsty, secondy)
+        result4 = await rent_getYearDwAvg(firstx, secondx, firsty, secondy)
+        
+        print(result1, result2, result3, result4)
+        return {"getMonthUpAvg":result1, "getMonthDwAvg":result2, "getYearUpAvg":result3, "getYearDwAvg":result4}
