@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/main.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>Document</title>
+</head>
+<body>
+    <!-- 이미지로 할시 -->
+    <!-- 1. 아래 비디오 할 시를 주석 처리 -->
+    <!-- 2. css의 html부분을 주석 해제 -->
+    <!-- 비디오로 할 시 -->
+    <div class="bg-video">
+        <video class="bg-video__content" autoplay muted loop>
+          <source src="./images/background.mp4" type="video/mp4" />
+          <source src="./images/background.webm" type="video/webm" />
+          Your browser is not supported!
+        </video>
+    </div>
+    
+
+    <div class="search-form yeon-sung-regular">
+        <button class="input-form" id="often-place" onclick="sample6_execDaumPostcode('often-place')" value="">
+            <span class="yeon-sung-regular">자주 가는 곳</span>
+        </button>
+        <div class="user-select-form">
+
+        </div>
+        <button class="input-form" id="search" value="" onclick="backPage()">
+            <span class="yeon-sung-regular">뒤로 가기</span>
+        </button>
+
+    </div>
+    <div class="kakaomap" id="map" style="width: 90%; height: 70%;"></div>
+    
+</body>
+</html>
+
+<script>
+    
+    function backPage(){
+        window.location.href = "main.html"
+    }
+
+    //input form
+</script>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=313f371b91fab48e12fcb9f519e4fe73"></script>
+<script type="text/javascript">
+	
+	var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+	var options = { //지도를 생성할 때 필요한 기본 옵션
+		center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
+		level: 3 //지도의 레벨(확대, 축소 정도)
+	};
+
+	var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+	
+</script>
+
+<style>
+/* 배경 이미지 */
+/* html {
+    background: url('images/main.jpg') no-repeat center fixed;  
+    background-size: cover;
+} */
+
+/* 배경 동영상 */
+.bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+}
+
+.bg-video__content {
+height: 100%;
+width: 100%;
+object-fit: cover;
+}
+
+/* 그리드 레이아웃 설정 */
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 세로 방향으로 3개의 칸 */
+    grid-template-rows: 1fr; /* 가로 방향으로 1개의 칸 */
+    height: 100vh; /* 전체 화면 높이 */
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-items: center; /* 수평 중앙 정렬 */
+    background-color: transparent;
+}
+
+/* search-form */
+.search-form {
+    grid-column: 1 / -1; /* 그리드 전체 폭을 차지 */
+    border-radius: 8px;
+    width: 30%; /* 너비를 비율로 지정 */
+    height: 50%; /* 높이를 비율로 지정 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: transparent;
+    padding: 20px;
+}
+
+/* 입력창 */
+.input-form {
+    border-radius: 8px;
+    border: 1px solid rgb(255, 177, 255);
+    padding: 5px;
+    background-color: white;
+    text-align: center;
+    width: 45vh;
+    font-size: 15px;
+    transition: all 1s;
+    margin-bottom: 10px;
+}
+
+.input-form:hover {
+    cursor: pointer;
+    font-size: 17px;
+    border: 1px solid white;
+    transition: all 0.5s, background-color 1.5s;
+}
+
+/* 유저가 선택한 위치 */
+.user-select-form {
+    background-color: white;
+    width: 43.5vh;
+    height: 80vh;
+    border-radius: 8px;
+    border: 1px solid rgb(255, 177, 255);
+    padding: 5px;
+    transition: all 0.5s;
+    margin-bottom: 10px;
+}
+
+/* 선택된 폼 */
+.select-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 3vh;
+    background-color: white;
+    border-radius: 8px;
+}
+
+.select-form:hover {
+    cursor: pointer;
+    background-color: lightcoral;
+    transition: all 0.5s;
+}
+  
+
+</style>
