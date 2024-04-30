@@ -44,6 +44,9 @@ rentdb = mydb['rent']
 base_url = 'http://192.168.1.98:5000/rent'
 
 
+############################################################
+
+# 주소의 좌표 찾기 함수
 def search_address(address):
     url = 'https://dapi.kakao.com/v2/local/search/address.json'
     headers = {
@@ -67,21 +70,30 @@ def search_address(address):
         print(f'Error: {response.status_code}')
         return None
 
+# 좌표 범위 알려주는 함수
 def getXYBound(x, y):
-  # 5km 구간
-  x = float(x)
-  y = float(y)
-  x_change = 5 / 111.2
-  y_change = abs(math.cos(x * (math.pi / 180)))
-  bounds = {
-    "firstx": x - x_change,
-    "firsty": y - y_change,
-    "secondx": x + x_change,
-    "secondy": y + y_change
-  }
-  return bounds
+    x = float(x)
+    y = float(y)
+    lat = math.radians(y)
+    lon = math.radians(x)
 
+    lat_change = 1.5 / 6371
+    lon_change = 1.5 / (6371 * math.cos(lat))
+
+    lat_change_deg = math.degrees(lat_change)
+    lon_change_deg = math.degrees(lon_change)
+
+    bounds = {
+    "firstx": x - lon_change_deg,
+    "firsty": y - lat_change_deg,
+    "secondx": x + lon_change_deg,
+    "secondy": y + lat_change_deg
+    }
+    return bounds
+
+# 걸리는 교통 시간 함수
 def getTime(oftenx, ofteny, wantx, wanty):
+    print("getTime" , oftenx, ofteny, wantx, wanty)
     url = "https://apis.openapi.sk.com/transit/routes/sub"
 
     payload = {
@@ -100,6 +112,7 @@ def getTime(oftenx, ofteny, wantx, wanty):
 
     response = requests.post(url, json=payload, headers=headers)
     data = response.json()
+    print("데이터", data)
     try : 
         # 가장 작은 totalTime을 가진 경로 찾기
         min_total_time = float('inf')
@@ -110,15 +123,15 @@ def getTime(oftenx, ofteny, wantx, wanty):
             if route['totalTime'] < min_total_time:
                 min_total_time = route['totalTime']
                 best_route = route
-    except KeyError as e:
-        return ("Status: 400")
+    except:
+        return {"min_total_time": 0}
     
     min_total_time = int(min_total_time/60)
     return {"min_total_time": min_total_time}
 
 #####################################################################
 
-
+# 기본 샘플
 @app.get(path='/rent')
 async def rent():
     response = requests.get(base_url)
@@ -127,6 +140,7 @@ async def rent():
     else:
         "NOT FOUND"
 
+# 기본 select
 @app.get("/rent/select-address")
 async def rent_selectAddress():
     params = '?HOUSE_GBN_NM=아파트&HOUSE_GBN_NM=연립다세대&HOUSE_GBN_NM=오피스텔'
@@ -159,7 +173,8 @@ async def rent_selectAddress():
             raise HTTPException(status_code=400, detail={"STATUS": 400})
     else:
         raise HTTPException(status_code=400, detail={"STATUS": 400})
-        
+
+# 기본 select     
 @app.get("/rent/find-coordinate")
 async def rent_findCoordinate():
     params = '?HOUSE_GBN_NM=아파트&HOUSE_GBN_NM=연립다세대&HOUSE_GBN_NM=오피스텔'
@@ -198,7 +213,8 @@ async def rent_findCoordinate():
             raise HTTPException(status_code=400, detail={"STATUS": 400})
     else:
         raise HTTPException(status_code=400, detail={"STATUS": 400})
-    
+
+# 기본 데이터 insert   
 @app.post('/rent/insert-coordinate')
 async def rent_insertCoordinate():
     params = '?HOUSE_GBN_NM=아파트&HOUSE_GBN_NM=연립다세대&HOUSE_GBN_NM=오피스텔'
@@ -250,7 +266,7 @@ async def rent_insertCoordinate():
         raise HTTPException(status_code=400, detail={"STATUS": 400,"RESULT": {"MESSAGE": "Failed to fetch data from API."}})
     
     
-#########################################################
+###########################STRART##############################
 
 
 
@@ -382,6 +398,7 @@ async def rent_insertYearAreaDw():
 
     return {"STATUS": 200, "RESULT": {"MESSAGE": "Data saved successfully", "COUNT": count}}
 
+## 전체 insert ##
 @app.get('/rent/insertall')
 async def rent_insertAll():
     result1 = await rent_insertMonthAreaUp()
@@ -391,6 +408,7 @@ async def rent_insertAll():
     
     return {"insertMonthAreaUp":result1, "insertYearAreaUp":result2, "insertMonthAreaDw":result3, "insertYearAreaDw":result4}
 
+## 전체 delete ##
 @app.delete('/rent/deleteall')
 async def rent_deleteAll():
     mydb['monthAreaUp'].delete_many({})
@@ -436,6 +454,9 @@ async def rent_getMonthUpAvg(firstx: float, secondx: float, firsty: float, secon
         }
     ])
     rent_data = list(rent_data)
+    if(len(rent_data) == 0):
+        rent_data[0] = 0
+        
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
         total_RENT_FEE = rent_data[0]['total_RENT_FEE']
@@ -472,6 +493,9 @@ async def rent_getMonthDwAvg(firstx: float, secondx: float, firsty: float, secon
         }
     ])
     rent_data = list(rent_data)
+    if(len(rent_data) == 0):
+        rent_data[0] = 0
+        
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
         total_RENT_FEE = rent_data[0]['total_RENT_FEE']
@@ -507,6 +531,9 @@ async def rent_getYearUpAvg(firstx: float, secondx: float, firsty: float, second
         }
     ])
     rent_data = list(rent_data)
+    if(len(rent_data) == 0):
+        rent_data[0] = 0
+        
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
         count = rent_data[0]['count']
@@ -539,6 +566,9 @@ async def rent_getYearDwAvg(firstx: float, secondx: float, firsty: float, second
         }
     ])
     rent_data = list(rent_data)
+    if(len(rent_data) == 0):
+        rent_data[0] = 0
+        
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
         count = rent_data[0]['count']
@@ -552,39 +582,11 @@ async def rent_getYearDwAvg(firstx: float, secondx: float, firsty: float, second
     else:
         raise HTTPException(status_code=400)
 
-# @app(/rent/less-ten-rank)
-# async def rentLessTenRank(month, year):
-
-# @app(/rent/more-ten-rank)
-# async def rentMessTenRank(month, year):
-
-# @app(/rent/get-rank)
-# async def getRank():
-#   await renLessTen(month, year)
-#   await renMoreTen(month, year)
-#   def rank_values(values):
-    # # 값들과 해당 값의 순위를 튜플로 묶습니다.
-    # ranked_values = sorted(((value, i) for i, value in enumerate(values, 1)), reverse=True)
-    
-    # # 정렬된 값을 기반으로 순위를 매깁니다.
-    # ranks = [rank for value, rank in ranked_values]
-    
-    # return ranks
-
-    # # 주어진 값들
-    # values = [7, 3, 10, 5, 2]
-
-    # # 값들의 순위 계산
-    # ranks = rank_values(values)
-
-    # # 결과 출력
-    # print("Values:", values)
-    # print("Ranked Values:", sorted(values, reverse=True))  # 값들 정렬하여 출력
-    # print("Ranks:", ranks  
-
+## 교통시간 보내주기 ##
 @app.post('/get-traffic-time')
 async def getTrafficTime(request: Request):
     datas = await request.json()
+    print(datas)
     oftenPlace = datas.get('oftenPlace')
     wantPlace = datas.get('wantPlace')
 
@@ -594,37 +596,103 @@ async def getTrafficTime(request: Request):
         return {'success': False}
     often_x, often_y = often_coordinates
 
-    for place in wantPlace:
-        want_coordinates = search_address(place)
-        if not want_coordinates:
-            print("ERROR : 살고 싶은 곳 데이터가 없음")
-            continue
-        want_x, want_y = want_coordinates
-        print(getTime(often_x, often_y, want_x, want_y))
-        res = getTime(often_x, often_y, want_x, want_y)
+    #for place in wantPlace:
+    want_coordinates = search_address(wantPlace)
+    print(f'{wantPlace}의 좌표 {want_coordinates}')
+    if not want_coordinates:
+        print("ERROR : 살고 싶은 곳 데이터가 없음")
+        return res
+    want_x, want_y = want_coordinates
+    print(getTime(often_x, often_y, want_x, want_y))
+    res = getTime(often_x, often_y, want_x, want_y)
+        
     return res
 
+## 평균값 보내주기 ##
 @app.post('/rent/get-avg')
 async def rent_getAvg(request: Request):
     data = await request.json()
-    print(data)
     wantPlace = data.get('wantPlace')
-    
-    for place in wantPlace:
-        coordinates = search_address(place)
-        if coordinates:
-            x, y = coordinates
-        bounds = getXYBound(x, y)
 
-        firstx = bounds["firstx"]
-        firsty = bounds["firsty"]
-        secondx = bounds["secondx"]
-        secondy = bounds["secondy"]
+    #for place in wantPlace:
+    coordinates = search_address(wantPlace)
+    if coordinates:
+        x, y = coordinates
+    bounds = getXYBound(x, y)
+    print("get-avg", bounds)
+
+    firstx = bounds["firstx"]
+    firsty = bounds["firsty"]
+    secondx = bounds["secondx"]
+    secondy = bounds["secondy"]
+    
+    result1 = await rent_getMonthUpAvg(firstx, secondx, firsty, secondy)
+    result2 = await rent_getMonthDwAvg(firstx, secondx, firsty, secondy)
+    result3 = await rent_getYearUpAvg(firstx, secondx, firsty, secondy)
+    result4 = await rent_getYearDwAvg(firstx, secondx, firsty, secondy)
+    
+    print(result1, result2, result3, result4)
         
-        result1 = await rent_getMonthUpAvg(firstx, secondx, firsty, secondy)
-        result2 = await rent_getMonthDwAvg(firstx, secondx, firsty, secondy)
-        result3 = await rent_getYearUpAvg(firstx, secondx, firsty, secondy)
-        result4 = await rent_getYearDwAvg(firstx, secondx, firsty, secondy)
-        
-        print(result1, result2, result3, result4)
-        return {"getMonthUpAvg":result1, "getMonthDwAvg":result2, "getYearUpAvg":result3, "getYearDwAvg":result4}
+    return {"getMonthUpAvg":result1, "getMonthDwAvg":result2, "getYearUpAvg":result3, "getYearDwAvg":result4}
+
+## 마커 좌표 ##
+@app.post('/get/less-map-marker')   
+async def get_lessMapMarker(request: Request): # 맵에 마커 찍을 좌표 알려주는 함수
+    data = await request.json()
+    wantPlace = data.get('wantPlace')
+
+    #for place in wantPlace:
+    coordinates = search_address(wantPlace)
+    if coordinates:
+        x, y = coordinates
+    bounds = getXYBound(x, y)
+    print("get-avg", bounds)
+
+    firstx = bounds["firstx"]
+    firsty = bounds["firsty"]
+    secondx = bounds["secondx"]
+    secondy = bounds["secondy"]
+    
+    rent_collection = mydb['rent']
+    filter_criteria = {
+        "RENT_AREA": {"$lt": 33},
+        "x": {"$gte": firstx, "$lte": secondx},
+        "y": {"$gte": firsty, "$lte": secondy},
+    }
+    
+    coordinate_data = rent_collection.find(filter_criteria, { "x":1, "y":1, "_id": 0 })
+    coordinate_data = list(coordinate_data)
+    return coordinate_data
+
+## 마커 좌표 ##
+@app.post('/get/more-map-marker')   
+async def get_moreMapMarker(request: Request):
+    data = await request.json()
+    wantPlace = data.get('wantPlace')
+
+    #for place in wantPlace:
+    coordinates = search_address(wantPlace)
+    if coordinates:
+        x, y = coordinates
+    bounds = getXYBound(x, y)
+    print("get-avg", bounds)
+
+    firstx = bounds["firstx"]
+    firsty = bounds["firsty"]
+    secondx = bounds["secondx"]
+    secondy = bounds["secondy"]
+    
+    rent_collection = mydb['rent']
+    filter_criteria = {
+        "RENT_AREA": {"$gt": 33},
+        "x": {"$gte": firstx, "$lte": secondx},
+        "y": {"$gte": firsty, "$lte": secondy},
+    }
+    
+    coordinate_data = rent_collection.find(filter_criteria, { "x":1, "y":1, "_id": 0 })
+    coordinate_data = list(coordinate_data)
+    return coordinate_data
+    
+    
+    
+    

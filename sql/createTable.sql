@@ -7,8 +7,7 @@ CREATE TABLE housing_data (
     more_month_avg INT NOT NULL,
     less_year_avg INT NOT NULL,
     more_year_avg INT NOT NULL,
-    rank_data INT NOT NULL,
-    PRIMARY KEY (oftenplace, wantplace, time)
+    PRIMARY KEY (wantplace)
 );
 
 CREATE TABLE place_coordinates (
