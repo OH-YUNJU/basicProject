@@ -24,45 +24,176 @@
           Your browser is not supported!
         </video>
     </div>
-    
 
+    <div id="map" style="width:60%;height:600px;left:80vh;top:7vh"></div>
+
+    <div id="web-info" class="yeon-sung-regular">
+        10평 이하 정렬</div>
     <div class="search-form yeon-sung-regular">
-        <button class="input-form" id="often-place" value="">
+        <button class="input-form" id="often-place">
             <span class="yeon-sung-regular">자주 가는 곳</span>
         </button>
         <div class="user-select-form">
-
+        
         </div>
+        <button class="input-form" id="next-page" value="" onclick="nextPage()">
+            <span class="yeon-sung-regular">10평 이상 정렬</span>
+        </button>
         <button class="input-form" id="search" value="" onclick="backPage()">
             <span class="yeon-sung-regular">뒤로 가기</span>
         </button>
-
     </div>
-    <div class="kakaomap" id="map" style="width: 90%; height: 70%;"></div>
     
 </body>
 </html>
 
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=313f371b91fab48e12fcb9f519e4fe73"></script>
+
 <script>
-    
+    function nextPage(){
+        window.location.href = "nextsearch.html"
+    }  
     function backPage(){
         window.location.href = "index.html"
-    }
-
-    //input form
+    }    
 </script>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=313f371b91fab48e12fcb9f519e4fe73"></script>
-<script type="text/javascript">
-	
-	var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-	var options = { //지도를 생성할 때 필요한 기본 옵션
-		center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
-		level: 3 //지도의 레벨(확대, 축소 정도)
-	};
+<script>
+    //var mapContainer = document.getElementById('map'), 
+    //    mapOption = { 
+    //        center: new kakao.maps.LatLng(37.53609444, 126.9675222), 
+     //       level: 3 
+     //   };
+    //var map = new kakao.maps.Map(mapContainer, mapOption); 
 
-	var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
-	
+    document.addEventListener('DOMContentLoaded', function () {
+        function fetchOftenPlaceData() {
+            fetch('/api/select-oftenplace')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('네트워크 응답에 문제가 있습니다.');
+                    }
+                    return response.json();
+                })
+                .then(results => {
+                    if (results.length > 0) {
+                        const oftenPlace = results[0].oftenplace;
+                        const oftenPlaceButton = document.getElementById('often-place');
+
+                        oftenPlaceButton.querySelector('span').textContent = oftenPlace;
+                    }
+                })
+                .catch(error => {
+                    console.error('API 호출 중 오류 발생:', error);
+                });
+        }
+        fetchOftenPlaceData();
+    });
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const mapContainer = document.getElementById('map'); // 지도를 표시할 div
+        const mapOption = {
+            center: new kakao.maps.LatLng(37.563522165046, 	126.99917408401), // 지도의 중심좌표
+            level: 9 // 지도의 확대 레벨
+        };
+        const map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+    
+        // 이 함수에서 동적으로 추가된 버튼에 이벤트 리스너를 적용합니다.
+        function fetchSelectRankData() {
+            fetch('/api/select-rank-less')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('네트워크 응답에 문제가 있습니다.');
+                    }
+                    return response.json();
+                })
+                .then(results => {
+                    const userSelectForm = document.querySelector('.user-select-form');
+    
+                    results.forEach(result => {
+                        // 결과 정보를 포함하는 div 요소 생성
+                        const resultDiv = document.createElement('div');
+                        resultDiv.classList.add('result-item');
+    
+                        const textContent = `${result.wantplace}<br>걸리는 시간: ${result.time}분<br>월세 평균: ${result.less_month_avg}만원<br>전세 평균: ${result.less_year_avg}만원&nbsp&nbsp`;
+                        resultDiv.innerHTML = textContent;
+    
+                        const button = document.createElement('button');
+                        button.classList.add('show-map-form');
+                        button.value = result.wantplace;
+                        button.innerHTML = '<span class="yeon-sung-regular">지도 보기</span>';
+    
+                        // 버튼을 추가합니다.
+                        resultDiv.appendChild(button);
+
+                        const br = document.createElement('br')
+                        resultDiv.appendChild(br);
+                        const separator = document.createTextNode('---------------------------------');
+                        resultDiv.appendChild(separator);
+
+                        userSelectForm.appendChild(resultDiv);
+    
+                        // 버튼에 이벤트 리스너를 추가합니다.
+                        button.addEventListener('click', async function () {
+                            const wantPlace = this.value; // 버튼의 value 값을 사용하여 wantPlace 가져오기
+        
+                            // /api/show-map-more 엔드포인트에 데이터 요청
+                            const response = await fetch('/api/show-map-less', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ wantPlace: [wantPlace] }) 
+                            });
+        
+                            if (!response.ok) {
+                                console.error('데이터 로드 실패:', response.statusText);
+                                return;
+                            }
+                            
+                            const positions = await response.json();
+
+                            const convertedData = [];
+                            // 응답 받은 좌표를 지도에 마커로 표시합니다.
+                            positions.forEach((item) => {
+                                // kakao.maps.LatLng 객체를 생성
+                                const latlng = new kakao.maps.LatLng(item.y, item.x);
+                                // 변환된 객체를 결과 배열에 추가
+                                convertedData.push({ latlng });
+                            });
+                            
+                            // convertedData에는 변환된 데이터 배열이 들어 있습니다.
+                            console.log(convertedData);
+                        
+                            for (var i = 0; i < convertedData.length; i ++) {
+    
+                                // 마커 이미지의 이미지 크기 입니다
+                                var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"; 
+                                var imageSize = new kakao.maps.Size(24, 35); 
+                                
+                                // 마커 이미지를 생성합니다    
+                                var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); 
+                                
+                                // 마커를 생성합니다
+                                var marker = new kakao.maps.Marker({
+                                    map: map, // 마커를 표시할 지도
+                                    position: convertedData[i].latlng, // 마커를 표시할 위치
+                                    image : markerImage // 마커 이미지 
+                                });
+                                console.log(marker)
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('API 호출 중 오류 발생:', error);
+                });
+        }
+    
+        // fetchSelectRankData 함수를 호출하여 데이터 로드 및 이벤트 리스너 적용을 시작합니다.
+        fetchSelectRankData();
+    });
+    
 </script>
 
 <style>
@@ -88,23 +219,35 @@ width: 100%;
 object-fit: cover;
 }
 
+#web-info{
+    position: absolute;
+    top: 5%;
+    left: 13vh;
+    width: 60vh;
+    height: 50vh;
+    font-size: 30px;
+    color: white;
+}
+
 /* 그리드 레이아웃 설정 */
 .container {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 세로 방향으로 3개의 칸 */
-    grid-template-rows: 1fr; /* 가로 방향으로 1개의 칸 */
-    height: 100vh; /* 전체 화면 높이 */
-    align-items: center; /* 수직 중앙 정렬 */
-    justify-items: center; /* 수평 중앙 정렬 */
+    grid-template-rows: 1fr; 
+    height: 100vh; 
+    align-items: center;
+    justify-items: center; 
     background-color: transparent;
 }
 
 /* search-form */
 .search-form {
-    grid-column: 1 / -1; /* 그리드 전체 폭을 차지 */
+    position: absolute; 
+    grid-column: 1 / -1; 
     border-radius: 8px;
-    width: 30%; /* 너비를 비율로 지정 */
-    height: 50%; /* 높이를 비율로 지정 */
+    top: 8%;
+    width: 30%; 
+    height: 85%; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -119,7 +262,7 @@ object-fit: cover;
     padding: 5px;
     background-color: white;
     text-align: center;
-    width: 45vh;
+    width: 50vh;
     font-size: 15px;
     transition: all 1s;
     margin-bottom: 10px;
@@ -135,7 +278,7 @@ object-fit: cover;
 /* 유저가 선택한 위치 */
 .user-select-form {
     background-color: white;
-    width: 43.5vh;
+    width: 45vh;
     height: 80vh;
     border-radius: 8px;
     border: 1px solid rgb(255, 177, 255);
@@ -160,5 +303,4 @@ object-fit: cover;
     transition: all 0.5s;
 }
   
-
 </style>

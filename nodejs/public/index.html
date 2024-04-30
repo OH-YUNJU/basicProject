@@ -34,7 +34,6 @@
     <div id="web-info" class="yeon-sung-regular">
         <구해봐요 서울의 방>은 살고 싶은 곳의 주소를 입력하면 입력한 주소 반경 내의 평균 월세, 전세 가격과 병원, 마트, 음식점 개수를 기반으로 추천하는 동네의 순위를 보여주는 웹사이트 입니다.   </div>
 
-
     <div class="search-form yeon-sung-regular">
         <button class="input-form" id="often-place" onclick="sample6_execDaumPostcode('often-place')" value="">
             <span>자주 가는 곳</span>
@@ -55,6 +54,7 @@
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
+    
     const searchData = []
 
     // 에숙파가 부릅니다 
@@ -80,7 +80,10 @@
             console.log(wantPlaceInput)
 
             sendPlacesToServer(oftenPlaceInput, wantPlaceInput);
-            window.location.href = "search.html"
+            setTimeout(() => {
+                console.log("페이지 이동 시도 중...");
+                window.location.href = "search.html";
+            }, 8000);
         }
     }
 

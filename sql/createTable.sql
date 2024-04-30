@@ -9,10 +9,3 @@ CREATE TABLE housing_data (
     more_year_avg INT NOT NULL,
     PRIMARY KEY (wantplace)
 );
-
-CREATE TABLE place_coordinates (
-    wantplace VARCHAR(255) NOT NULL,
-    x FLOAT NOT NULL,
-    y FLOAT NOT NULL,
-    PRIMARY KEY (wantplace)
-);

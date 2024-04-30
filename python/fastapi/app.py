@@ -77,8 +77,8 @@ def getXYBound(x, y):
     lat = math.radians(y)
     lon = math.radians(x)
 
-    lat_change = 1.5 / 6371
-    lon_change = 1.5 / (6371 * math.cos(lat))
+    lat_change = 1 / 6371
+    lon_change = 1 / (6371 * math.cos(lat))
 
     lat_change_deg = math.degrees(lat_change)
     lon_change_deg = math.degrees(lon_change)
@@ -456,6 +456,7 @@ async def rent_getMonthUpAvg(firstx: float, secondx: float, firsty: float, secon
     rent_data = list(rent_data)
     if(len(rent_data) == 0):
         rent_data[0] = 0
+        count = 0
         
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
@@ -495,6 +496,7 @@ async def rent_getMonthDwAvg(firstx: float, secondx: float, firsty: float, secon
     rent_data = list(rent_data)
     if(len(rent_data) == 0):
         rent_data[0] = 0
+        count = 0
         
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
@@ -533,6 +535,7 @@ async def rent_getYearUpAvg(firstx: float, secondx: float, firsty: float, second
     rent_data = list(rent_data)
     if(len(rent_data) == 0):
         rent_data[0] = 0
+        count = 0
         
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']
@@ -568,6 +571,7 @@ async def rent_getYearDwAvg(firstx: float, secondx: float, firsty: float, second
     rent_data = list(rent_data)
     if(len(rent_data) == 0):
         rent_data[0] = 0
+        count = 0
         
     if rent_data:
         total_RENT_GTN = rent_data[0]['total_RENT_GTN']

@@ -123,30 +123,107 @@ const handleRequest = async (req, res) => {
 app.post('/api/get-oftenplace', handleRequest);
 
 
-// sql 다 지우는 함수도 만들기                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+// sql 다 지우는 함수도 만들기 
+
+app.get('/api/select-oftenplace', (req, res) => {
+    connection.query("SELECT oftenplace FROM housing_data LIMIT 1", (error, results, fields) => {
+        if (error) {
+            // 에러 처리
+            console.error('쿼리 실행 중 오류 발생:', error);
+            res.status(500).send('내부 서버 오류');
+            return;
+        }
+        res.json(results);
+    });
+})
+app.get('/api/select-rank-less', (req, res) => {
+    connection.query("SELECT wantplace, time, less_month_avg, less_year_avg FROM housing_data ORDER BY less_month_avg ASC", (error, results, fields) => {
+        if (error) {
+            // 에러 처리
+            console.error('쿼리 실행 중 오류 발생:', error);
+            res.status(500).send('내부 서버 오류');
+            return;
+        }
+        res.json(results);
+    });
+});
+app.get('/api/select-rank-more', (req, res) => {
+    connection.query("SELECT wantplace, time, more_month_avg, more_year_avg FROM housing_data ORDER BY more_month_avg ASC", (error, results, fields) => {
+        if (error) {
+            // 에러 처리
+            console.error('쿼리 실행 중 오류 발생:', error);
+            res.status(500).send('내부 서버 오류');
+            return;
+        }
+        res.json(results);
+    });
+});
 
 const mapRequestLess = async (req, res) => {
-    const { oftenPlace, wantPlace } = req.body;
-    for (const place of wantPlace) {
-        const mapResponse = await axios.post('http://192.168.1.98:3000/get/less-map-marker', {
-            oftenPlace,
-            wantPlace: place,
-        });
-        console.log('지도 응답:', mapResponse.data);
+    const { wantPlace } = req.body;
+    const positions = [];
+
+    try {
+        for (const place of wantPlace) {
+            const mapResponse = await axios.post('http://192.168.1.98:3000/get/less-map-marker', {
+                wantPlace: place,
+            });
+            // 주어진 위치 데이터를 사용하여 positions 배열에 요소를 추가합니다.
+            mapResponse.data.forEach(position => {
+                const { x, y } = position; // 객체 구조 분해 할당을 사용하여 x와 y 추출
+                
+                const latLngObj = {
+                    y,
+                    x
+                };
+                
+                positions.push(
+                    latLngObj // latlng 객체를 latlng 프로퍼티에 할당
+                );
+            });
+
+        }
+        res.json(positions);
+        console.log(positions)
+    } catch (error) {
+        console.error('요청 처리 중 오류 발생:', error);
+        res.status(500).send('내부 서버 오류');
     }
 };
 app.post('/api/show-map-less', mapRequestLess);
 
 const mapRequestMore = async (req, res) => {
-    const { oftenPlace, wantPlace } = req.body;
-    for (const place of wantPlace) {
-        const mapResponse = await axios.post('http://192.168.1.98:3000/get/more-map-marker', {
-            oftenPlace,
-            wantPlace: place,
-        });
-        console.log('지도 응답:', mapResponse.data);
+    const { wantPlace } = req.body;
+    const positions = [];
+
+    try {
+        for (const place of wantPlace) {
+            const mapResponse = await axios.post('http://192.168.1.98:3000/get/more-map-marker', {
+                wantPlace: place,
+            });
+            // 주어진 위치 데이터를 사용하여 positions 배열에 요소를 추가합니다.
+            mapResponse.data.forEach(position => {
+                const { x, y } = position; // 객체 구조 분해 할당을 사용하여 x와 y 추출
+                
+                const latLngObj = {
+                    y,
+                    x
+                };
+                
+                positions.push(
+                    latLngObj // latlng 객체를 latlng 프로퍼티에 할당
+                );
+            });
+
+        }
+        res.json(positions);
+        console.log(positions)
+    } catch (error) {
+        console.error('요청 처리 중 오류 발생:', error);
+        res.status(500).send('내부 서버 오류');
     }
 };
 app.post('/api/show-map-more', mapRequestMore);
+
 
 module.exports = app;
