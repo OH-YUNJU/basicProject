@@ -122,9 +122,6 @@ const handleRequest = async (req, res) => {
 
 app.post('/api/get-oftenplace', handleRequest);
 
-
-// sql 다 지우는 함수도 만들기 
-
 app.get('/api/select-oftenplace', (req, res) => {
     connection.query("SELECT oftenplace FROM housing_data LIMIT 1", (error, results, fields) => {
         if (error) {
@@ -168,9 +165,8 @@ const mapRequestLess = async (req, res) => {
             const mapResponse = await axios.post('http://192.168.1.98:3000/get/less-map-marker', {
                 wantPlace: place,
             });
-            // 주어진 위치 데이터를 사용하여 positions 배열에 요소를 추가합니다.
             mapResponse.data.forEach(position => {
-                const { x, y } = position; // 객체 구조 분해 할당을 사용하여 x와 y 추출
+                const { x, y } = position; 
                 
                 const latLngObj = {
                     y,
@@ -178,7 +174,7 @@ const mapRequestLess = async (req, res) => {
                 };
                 
                 positions.push(
-                    latLngObj // latlng 객체를 latlng 프로퍼티에 할당
+                    latLngObj 
                 );
             });
 
@@ -201,9 +197,8 @@ const mapRequestMore = async (req, res) => {
             const mapResponse = await axios.post('http://192.168.1.98:3000/get/more-map-marker', {
                 wantPlace: place,
             });
-            // 주어진 위치 데이터를 사용하여 positions 배열에 요소를 추가합니다.
             mapResponse.data.forEach(position => {
-                const { x, y } = position; // 객체 구조 분해 할당을 사용하여 x와 y 추출
+                const { x, y } = position;
                 
                 const latLngObj = {
                     y,
@@ -211,7 +206,7 @@ const mapRequestMore = async (req, res) => {
                 };
                 
                 positions.push(
-                    latLngObj // latlng 객체를 latlng 프로퍼티에 할당
+                    latLngObj 
                 );
             });
 
@@ -225,5 +220,21 @@ const mapRequestMore = async (req, res) => {
 };
 app.post('/api/show-map-more', mapRequestMore);
 
+app.get('/api/clear-housing-data', async (req,res) => {
+    try{
+        await connection.query('TRUNCATE TABLE housing_data;')
+        res.status(200).send('테이블 데이터가 성공적으로 삭제되었습니다.');
+        // , (error, results, fields) => {
+        //     if (error) {
+        //         // 에러 처리z
+        //         console.error('쿼리 실행 중 오류 발생:', error);
+        //         res.status(500).send('내부 서버 오류');
+        //     }
+        // });
+    } catch (error){
+        console.log(error);
+    }
+});
 
 module.exports = app;
+

@@ -25,7 +25,7 @@
         </video>
     </div>
 
-    <div id="map" style="width:60%;height:600px;left:80vh;top:7vh"></div>
+    <div id="map"></div>
 
     <div id="web-info" class="yeon-sung-regular">
         10평 이상 정렬</div>
@@ -48,23 +48,26 @@
 </html>
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=313f371b91fab48e12fcb9f519e4fe73"></script>
-
+<script type="text/javascript" src="./index.js"></script>
 <script>
     function nextPage(){
-        window.location.href = "search.html"
+        window.location.href = "search.html?token=1234"
     }  
     function backPage(){
-        window.location.href = "index.html"
-    }    
+        window.location.href = "index.html?token=1234"
+    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (token !== '1234') {
+        alert('접속 불가');
+        window.history.back();  
+    } else {
+        console.log('페이지 로드 허용');
+    }
 </script>
 
 <script>
-    //var mapContainer = document.getElementById('map'), 
-    //    mapOption = { 
-    //        center: new kakao.maps.LatLng(37.53609444, 126.9675222), 
-     //       level: 3 
-     //   };
-    //var map = new kakao.maps.Map(mapContainer, mapOption); 
 
     document.addEventListener('DOMContentLoaded', function () {
         function fetchOftenPlaceData() {
@@ -91,12 +94,12 @@
     });
     
     document.addEventListener('DOMContentLoaded', function () {
-        const mapContainer = document.getElementById('map'); // 지도를 표시할 div
+        const mapContainer = document.getElementById('map'); 
         const mapOption = {
-            center: new kakao.maps.LatLng(37.563522165046, 	126.99917408401), // 지도의 중심좌표
-            level: 9 // 지도의 확대 레벨
+            center: new kakao.maps.LatLng(37.563522165046, 	126.99917408401), 
+            level: 9 
         };
-        const map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+        const map = new kakao.maps.Map(mapContainer, mapOption); 
     
         // 이 함수에서 동적으로 추가된 버튼에 이벤트 리스너를 적용합니다.
         function fetchSelectRankData() {
@@ -111,7 +114,6 @@
                     const userSelectForm = document.querySelector('.user-select-form');
     
                     results.forEach(result => {
-                        // 결과 정보를 포함하는 div 요소 생성
                         const resultDiv = document.createElement('div');
                         resultDiv.classList.add('result-item');
     
@@ -123,7 +125,6 @@
                         button.value = result.wantplace;
                         button.innerHTML = '<span class="yeon-sung-regular">지도 보기</span>';
     
-                        // 버튼을 추가합니다.
                         resultDiv.appendChild(button);
 
                         const br = document.createElement('br')
@@ -133,9 +134,8 @@
 
                         userSelectForm.appendChild(resultDiv);
     
-                        // 버튼에 이벤트 리스너를 추가합니다.
                         button.addEventListener('click', async function () {
-                            const wantPlace = this.value; // 버튼의 value 값을 사용하여 wantPlace 가져오기
+                            const wantPlace = this.value; 
         
                             // /api/show-map-more 엔드포인트에 데이터 요청
                             const response = await fetch('/api/show-map-more', {
@@ -154,31 +154,25 @@
                             const positions = await response.json();
 
                             const convertedData = [];
-                            // 응답 받은 좌표를 지도에 마커로 표시합니다.
+ 
                             positions.forEach((item) => {
-                                // kakao.maps.LatLng 객체를 생성
                                 const latlng = new kakao.maps.LatLng(item.y, item.x);
-                                // 변환된 객체를 결과 배열에 추가
                                 convertedData.push({ latlng });
                             });
                             
-                            // convertedData에는 변환된 데이터 배열이 들어 있습니다.
                             console.log(convertedData);
                         
                             for (var i = 0; i < convertedData.length; i ++) {
     
-                                // 마커 이미지의 이미지 크기 입니다
                                 var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"; 
                                 var imageSize = new kakao.maps.Size(24, 35); 
-                                
-                                // 마커 이미지를 생성합니다    
+                                  
                                 var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); 
                                 
-                                // 마커를 생성합니다
                                 var marker = new kakao.maps.Marker({
-                                    map: map, // 마커를 표시할 지도
-                                    position: convertedData[i].latlng, // 마커를 표시할 위치
-                                    image : markerImage // 마커 이미지 
+                                    map: map, 
+                                    position: convertedData[i].latlng, 
+                                    image : markerImage 
                                 });
                                 console.log(marker)
                             }
@@ -190,7 +184,6 @@
                 });
         }
     
-        // fetchSelectRankData 함수를 호출하여 데이터 로드 및 이벤트 리스너 적용을 시작합니다.
         fetchSelectRankData();
     });
     
@@ -227,6 +220,18 @@ object-fit: cover;
     height: 50vh;
     font-size: 30px;
     color: white;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+#map {
+    width:65%;
+    height:85%;
+    left:65vh;
+    top:8vh;
 }
 
 /* 그리드 레이아웃 설정 */
@@ -285,6 +290,7 @@ object-fit: cover;
     padding: 5px;
     transition: all 0.5s;
     margin-bottom: 10px;
+    overflow: auto;
 }
 
 /* 선택된 폼 */

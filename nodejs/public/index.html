@@ -48,15 +48,36 @@
         </button>
     </div>
     
- 
 </body>
 </html>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script>
-    
-    const searchData = []
 
+<script>
+
+    window.onload=function(){
+        fetch('/api/clear-housing-data', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('네트워크 응답에 문제가 있습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('서버 응답:', data);
+            // 필요한 경우 응답 데이터를 처리합니다.
+        })
+        .catch(error => {
+            console.error('오류:', error);
+        });
+    };
+
+    const searchData = []
     // 에숙파가 부릅니다 
     // Next Page;
     function nextPage(){
@@ -66,7 +87,6 @@
         if(document.querySelector("#often-place").textContent === "\n            자주 가는 곳\n        "){
             alert("자주 가는 곳을 입력하세요.")
         }
-
         // 검색 데이터가 빈 경우
         else if(searchDataSize == 0){
             alert("살고 싶은 곳을 입력하세요.")
@@ -80,10 +100,10 @@
             console.log(wantPlaceInput)
 
             sendPlacesToServer(oftenPlaceInput, wantPlaceInput);
-            setTimeout(() => {
-                console.log("페이지 이동 시도 중...");
-                window.location.href = "search.html";
-            }, 8000);
+            //setTimeout(() => {
+            //    console.log("페이지 이동 시도 중...");
+            //    window.location.href = "search.html";
+            //}, 10000);
         }
     }
 
@@ -227,6 +247,12 @@
         .then(response => response.json())
         .then(data => {
             console.log('서버 응답:', data);
+            if (data.status === 200) { 
+                window.location.href = "search.html?token=1234"; 
+
+            } else {
+                console.error('작업 실패:', data.error);
+            }
         })
         .catch(error => {
             console.error('오류:', error);
