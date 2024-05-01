@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/search.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +13,6 @@
     <title>Document</title>
 </head>
 <body>
-    <!-- 이미지로 할시 -->
-    <!-- 1. 아래 비디오 할 시를 주석 처리 -->
-    <!-- 2. css의 html부분을 주석 해제 -->
-    <!-- 비디오로 할 시 -->
     <div class="bg-video">
         <video class="bg-video__content" autoplay muted loop>
           <source src="./images/background.mp4" type="video/mp4" />
@@ -48,7 +44,7 @@
 </html>
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=313f371b91fab48e12fcb9f519e4fe73"></script>
-<script type="text/javascript" src="./index.js"></script>
+
 <script>
     function nextPage(){
         window.location.href = "search.html?token=1234"
@@ -68,7 +64,7 @@
 </script>
 
 <script>
-
+    // mysql 불러오기
     document.addEventListener('DOMContentLoaded', function () {
         function fetchOftenPlaceData() {
             fetch('/api/select-oftenplace')
@@ -92,7 +88,7 @@
         }
         fetchOftenPlaceData();
     });
-    
+    // 카카오맵 마크 및 지도보기 버튼 생성
     document.addEventListener('DOMContentLoaded', function () {
         const mapContainer = document.getElementById('map'); 
         const mapOption = {
@@ -101,7 +97,6 @@
         };
         const map = new kakao.maps.Map(mapContainer, mapOption); 
     
-        // 이 함수에서 동적으로 추가된 버튼에 이벤트 리스너를 적용합니다.
         function fetchSelectRankData() {
             fetch('/api/select-rank-more')
                 .then(response => {
@@ -183,130 +178,7 @@
                     console.error('API 호출 중 오류 발생:', error);
                 });
         }
-    
         fetchSelectRankData();
     });
     
 </script>
-
-<style>
-/* 배경 이미지 */
-/* html {
-    background: url('images/main.jpg') no-repeat center fixed;  
-    background-size: cover;
-} */
-
-/* 배경 동영상 */
-.bg-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: -1;
-}
-
-.bg-video__content {
-height: 100%;
-width: 100%;
-object-fit: cover;
-}
-
-#web-info{
-    position: absolute;
-    top: 5%;
-    left: 13vh;
-    width: 60vh;
-    height: 50vh;
-    font-size: 30px;
-    color: white;
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-}
-
-#map {
-    width:65%;
-    height:85%;
-    left:65vh;
-    top:8vh;
-}
-
-/* 그리드 레이아웃 설정 */
-.container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 세로 방향으로 3개의 칸 */
-    grid-template-rows: 1fr; 
-    height: 100vh; 
-    align-items: center;
-    justify-items: center; 
-    background-color: transparent;
-}
-
-/* search-form */
-.search-form {
-    position: absolute; 
-    grid-column: 1 / -1; 
-    border-radius: 8px;
-    top: 8%;
-    width: 30%; 
-    height: 85%; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: transparent;
-    padding: 20px;
-}
-
-/* 입력창 */
-.input-form {
-    border-radius: 8px;
-    border: 1px solid rgb(255, 177, 255);
-    padding: 5px;
-    background-color: white;
-    text-align: center;
-    width: 50vh;
-    font-size: 15px;
-    transition: all 1s;
-    margin-bottom: 10px;
-}
-
-.input-form:hover {
-    cursor: pointer;
-    font-size: 17px;
-    border: 1px solid white;
-    transition: all 0.5s, background-color 1.5s;
-}
-
-/* 유저가 선택한 위치 */
-.user-select-form {
-    background-color: white;
-    width: 45vh;
-    height: 80vh;
-    border-radius: 8px;
-    border: 1px solid rgb(255, 177, 255);
-    padding: 5px;
-    transition: all 0.5s;
-    margin-bottom: 10px;
-    overflow: auto;
-}
-
-/* 선택된 폼 */
-.select-form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 3vh;
-    background-color: white;
-    border-radius: 8px;
-}
-
-.select-form:hover {
-    cursor: pointer;
-    background-color: lightcoral;
-    transition: all 0.5s;
-}
-  
-</style>

@@ -54,7 +54,6 @@
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
-
     window.onload=function(){
         fetch('/api/clear-housing-data', {
             method: 'GET',
@@ -100,10 +99,6 @@
             console.log(wantPlaceInput)
 
             sendPlacesToServer(oftenPlaceInput, wantPlaceInput);
-            //setTimeout(() => {
-            //    console.log("페이지 이동 시도 중...");
-            //    window.location.href = "search.html";
-            //}, 10000);
         }
     }
 
@@ -138,13 +133,12 @@
         })
     }
     
-    //카카오 API
     function sample6_execDaumPostcode(ID) {
         new daum.Postcode({
-        width : 600, // 팝업 창의 너비
-        height : 600, // 팝업 창의 높이
-        left : 900, // 팝업 창의 가로 위치
-        top : 400, // 팝업 창의 세로 위치
+        width : 600, 
+        height : 600, 
+        left : 900, 
+        top : 400, 
             oncomplete: function(data) {
                 var addr = '';
                 var extraAddr = ''; 
@@ -167,9 +161,7 @@
                     if(extraAddr !== ''){
                         extraAddr = ' (' + extraAddr + ')';
                     }
-                
                 }
-
                 // 우편번호와 주소 정보를 해당 필드에 넣는다.
                 if(ID === "often-place"){
                     const oftenPlace = document.querySelector("#often-place");
@@ -189,7 +181,6 @@
                             isInclued = true;
                         }
                     })
-
                     console.log(isInclued);
                     
                     if(isInclued){
@@ -227,6 +218,7 @@
         }).open();
     }
 
+    // mysql insert
     function sendPlacesToServer(oftenPlaceInput, wantPlaceInput) {
         //const oftenPlaceInput = document.getElementById('often-place');
         //const wantPlaceInput = document.getElementById('want-place');
@@ -260,138 +252,3 @@
     }
    
 </script>
-
-<style>
-/* 배경 이미지 */
-/* html {
-    background: url('images/main.jpg') no-repeat center fixed;  
-    background-size: cover;
-} */
-
-/* 배경 동영상 */
-.bg-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: -1;
-}
-
-.bg-video__content {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-}
-
-button {
-    margin: 0;
-    padding: 0;
-    border: none;
-    box-shadow: none;
-    background: none;
-
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-
-    cursor: pointer;
-    outline: none;
-}
-
-#web-info{
-    position: absolute;
-    top: 30vh;
-    left: 20vh;
-    
-    width: 60vh;
-    height: 50vh;
-    font-size: 20px;
-    color: white;
-}
-
-.search-form{
-    /* background-color: red; */
-    position: absolute;
-    top:20vh;
-    right: 15vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 8px;
-    width: 55vh;
-    height: 70vh;
-}
-body{
-    margin: 0;
-}
-
-/* 구해봐요 서울의 방 위치 고정 */
-.custom-font{
-    position: absolute;
-    top: 10vh;
-    left: 20vh;
-    font-size: 50px;
-    color: white;
-}
-
-/* 입력창 */
-.input-form{
-    border-radius: 8px;
-    border: 1px solid rgb(255, 177, 255);
-    padding: 5px;
-    background-color: white;
-    text-align: center;
-    width: 45vh;
-    font-size: 15px;
-    transition: all 1s;
-    margin-bottom: 10px;
-}
-
-.input-form:hover {
-    cursor: pointer;
-    font-size: 17px;
-    background-color: rgb(255, 177, 255);
-    border:1px solid white;
-    transition: all 0.5s, background-color 1.5s;
-}
-
-/* 유저가 선택한 위치 */
-.user-select-form{
-    background-color: white;
-    width: 43.5vh;
-    height: 40vh;
-    border-radius: 8px;
-    border: 1px solid rgb(255, 177, 255);
-    padding: 5px;
-    transition: all 0.5s;
-    margin-bottom: 10px;
-}
-.select-form{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 3vh;
-    background-color: white;
-    border-radius: 8px;
-}
-.select-form:hover{
-    cursor: pointer;
-    background-color: lightcoral;
-    transition: all 0.5s;
-}
-
-#search:hover{
-    font-size: 30px;
-    transition: all 1s;
-}
-
-.material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
-}
-</style>
