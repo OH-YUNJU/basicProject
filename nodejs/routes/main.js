@@ -119,7 +119,6 @@ const handleRequest = async (req, res) => {
         res.status(400).json({ status: 400, error: 'Internal Server Error' });
     }
 };
-
 app.post('/api/get-oftenplace', handleRequest);
 
 app.get('/api/select-oftenplace', (req, res) => {
@@ -130,7 +129,7 @@ app.get('/api/select-oftenplace', (req, res) => {
             res.status(500).send('내부 서버 오류');
             return;
         }
-        res.json(results);
+        res.status(200).json(results);
     });
 })
 app.get('/api/select-rank-less', (req, res) => {
@@ -141,7 +140,7 @@ app.get('/api/select-rank-less', (req, res) => {
             res.status(500).send('내부 서버 오류');
             return;
         }
-        res.json(results);
+        res.status(200).json(results);
     });
 });
 app.get('/api/select-rank-more', (req, res) => {
@@ -152,7 +151,7 @@ app.get('/api/select-rank-more', (req, res) => {
             res.status(500).send('내부 서버 오류');
             return;
         }
-        res.json(results);
+        res.status(200).json(results);
     });
 });
 
@@ -165,6 +164,7 @@ const mapRequestLess = async (req, res) => {
             const mapResponse = await axios.post('http://192.168.1.98:3000/get/less-map-marker', {
                 wantPlace: place,
             });
+          
             mapResponse.data.forEach(position => {
                 const { x, y } = position; 
                 
@@ -179,7 +179,7 @@ const mapRequestLess = async (req, res) => {
             });
 
         }
-        res.json(positions);
+        res.status(200).json(positions);
         console.log(positions)
     } catch (error) {
         console.error('요청 처리 중 오류 발생:', error);
@@ -211,7 +211,7 @@ const mapRequestMore = async (req, res) => {
             });
 
         }
-        res.json(positions);
+        res.status(200).json(positions);
         console.log(positions)
     } catch (error) {
         console.error('요청 처리 중 오류 발생:', error);
@@ -224,13 +224,7 @@ app.get('/api/clear-housing-data', async (req,res) => {
     try{
         await connection.query('TRUNCATE TABLE housing_data;')
         res.status(200).send('테이블 데이터가 성공적으로 삭제되었습니다.');
-        // , (error, results, fields) => {
-        //     if (error) {
-        //         // 에러 처리z
-        //         console.error('쿼리 실행 중 오류 발생:', error);
-        //         res.status(500).send('내부 서버 오류');
-        //     }
-        // });
+    
     } catch (error){
         console.log(error);
     }
