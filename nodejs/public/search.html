@@ -108,11 +108,11 @@
                 .then(results => {
                     const userSelectForm = document.querySelector('.user-select-form');
     
-                    results.forEach(result => {
+                    results.forEach((result,index) => {
                         const resultDiv = document.createElement('div');
                         resultDiv.classList.add('result-item');
     
-                        const textContent = `${result.wantplace}<br>걸리는 시간: ${result.time}분<br>월세 평균: ${result.less_month_avg}만원<br>전세 평균: ${result.less_year_avg}만원&nbsp&nbsp`;
+                        const textContent = `${index + 1}. ${result.wantplace}<br>걸리는 시간: ${result.time}분<br>월세 평균: ${result.less_month_avg}만원<br>전세 평균: ${result.less_year_avg}만원&nbsp&nbsp`;
                         resultDiv.innerHTML = textContent;
     
                         const button = document.createElement('button');
